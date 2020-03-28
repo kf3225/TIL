@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/xml"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 )
 
@@ -13,13 +13,21 @@ type Post struct {
 	ID      string   `xml:"id,attr"`
 	Content string   `xml:"content"`
 	Author  Author   `xml:"author"`
-	XMLStr  string   `xml:",innerxml"`
+	// XMLStr   string    `xml:",innerxml"`
+	Comments []Comment `xml:"comments>comment"`
+}
+
+// Comment struct
+type Comment struct {
+	ID      string `xml:"id,attr"`
+	Content string `xml:"content"`
+	Author  Author `xml:"author"`
 }
 
 // Author struct
 type Author struct {
-	ID   string `xml:id,attr`
-	Name string `xml:"chardata"`
+	ID   string `xml:"id,attr"`
+	Name string `xml:",chardata"`
 }
 
 func main() {
@@ -30,17 +38,35 @@ func main() {
 	}
 	defer xmlFile.Close()
 
-	xmlData, err := ioutil.ReadAll(xmlFile)
-	if err != nil {
-		fmt.Println("Error reading XML file", err)
-		return
+	decoder := xml.NewDecoder(xmlFile)
+
+	for {
+		t, err := decoder.Token()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			fmt.Println("Error decoding XML into tokens", err)
+			return
+		}
+
+		switch se := t.(type) {
+		case xml.StartElement:
+			switch se.Name.Local {
+			case "comment":
+				var comment Comment
+				decoder.DecodeElement(&comment, &se)
+				//fmt.Println(comment)
+			case "author":
+				var author Author
+				decoder.DecodeElement(&author, &se)
+				//fmt.Println(author)
+			case "post":
+				var post Post
+				decoder.DecodeElement(&post, &se)
+				fmt.Println(post)
+			}
+		}
 	}
 
-	var post Post
-	xml.Unmarshal(xmlData, &post)
-	fmt.Println(post.XMLName)
-	fmt.Println(post.ID)
-	fmt.Println(post.Content)
-	fmt.Println(post.Author)
-	fmt.Println(post.XMLStr)
 }

@@ -1,4 +1,4 @@
-GOのXMLの取り扱い
+GOのXML(Decode)
 ============
 
 ## XMLを定義
@@ -115,4 +115,66 @@ StartElementは開始タグのこと
   4. 未処理データ : \`xml:,innerxml\`
   5. モードデータ（,attr・,chardata・,innerxmlなど）がない場合は構造体のフィールドは構造体名と同じ名前のXMLの要素と紐付けられる
   6. 木構造を使ってでなく要素を直接取得したい場合は\`xml:"a>b>c"\`を使用する（aとbは中間要素でcが取得したいノード）
+
+<br>
+
+GOのXML（Encode）
+============
+
+## 構造体を定義
+
+```go
+type Post struct {
+	XMLName xml.Name `xml:"post"`
+	ID      string   `xml:"id,attr"`
+	Content string   `xml:"content"`
+	Author  Author   `xml:"author"`
+}
+```
+
+```go
+type Author struct {
+	ID   string `xml:"id,attr"`
+	Name string `xml:",chardata"`
+}
+```
+
+<br>
+
+## Marshal
+```go
+buffer := &bytes.Buffer{}
+_, err := buffer.Write([]byte(xml.Header))
+```
+バッファを作ってそこにまずxmlのヘッダを書き込む
+```go
+encoder := xml.NewEncoder(buffer)
+```
+エンコーダ作成
+
+```go
+encoder.Indent("", "\t")
+```
+prefix（行頭）は空文字でインデントはタブを設定
+```go
+err = encoder.Encode(&post)
+```
+構造体の参照を渡してエンコード
+```go
+err = ioutil.WriteFile("post_w.xml", []byte(buffer.String()), 0644)
+```
+バッファをファイルに書き込む
+
+<br>
+
+## 実行結果（xmlの中身）
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<post id="1">
+        <content>Hello World</content>
+        <author id="1">Keisuke</author>
+</post>
+```
+
+<br>
 

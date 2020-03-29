@@ -61,4 +61,8 @@ func main() {
 		return
 	}
 	err = ioutil.WriteFile("post_w2.json", b, 0644)
+	if err != nil {
+		fmt.Println("Error writing JSON File :", err)
+		return
+	}
 }

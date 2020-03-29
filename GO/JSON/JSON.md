@@ -55,16 +55,12 @@ type Post struct {
 	Author   Author    `json:"author"`
 	Comments []Comment `json:"comments"`
 }
-```
 
-```go
 type Author struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
 }
-```
 
-```go
 type Comment struct {
 	ID      int    `json:"id"`
 	Content string `json:"content"`
@@ -151,3 +147,71 @@ type Reader interface {
 このシグネチャを持っているメソッドが実装されている型はio.Readerに該当
 
 -> これが世に言うダックタイピングか？
+
+<br>
+
+JSON(Encode)
+============
+
+<br>
+
+## 構造体を定義
+
+```go
+type Post struct {
+	ID       int       `json:"id"`
+	Content  string    `json:"content"`
+	Author   Author    `json:"author"`
+	Comments []Comment `json:"comments"`
+}
+
+type Author struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+type Comment struct {
+	ID      int    `json:"id"`
+	Content string `json:"content"`
+	Author  Author `json:"author"`
+}
+```
+
+<br>
+
+## Marshalの場合
+
+```go
+b, err := json.MarshalIndent(&post, "", "\t")
+```
+encoding/jsonのMarshalIndentに構造体の参照、prefix、インデントを設定
+
+```go
+err = ioutil.WriteFile("post_w2.json", b, 0644)
+```
+io/ioutilのWriteFileにファイル名とバイト配列、ファイル権限を渡してファイルに書き込み
+
+<br>
+
+## Encodeの場合
+
+```go
+jsonFile, err := os.Create("post_w1.json")
+```
+osのCreateにファイル名を設定してファイル作成
+
+```go
+encoder := json.NewEncoder(jsonFile)
+```
+encoding/jsonのNewEncoderに生成したファイルポインタを渡し、エンコーダーを生成
+
+```go
+encoder.SetIndent("", "\t")
+```
+SetIndentにprefixとインデントを設定
+
+```go
+err = encoder.Encode(&post)
+```
+データの格納してある構造体の参照をEncodeメソッドに渡してファイルにエンコードする
+

@@ -1,0 +1,26 @@
+{
+	"id": 1,
+	"content": "Hello World!",
+	"author": {
+		"id": 2,
+		"name": "Keisuke"
+	},
+	"comments": [
+		{
+			"id": 3,
+			"author": {
+				"id": 4,
+				"name": "Taro"
+			},
+			"content": "Have a great day!"
+		},
+		{
+			"id": 5,
+			"author": {
+				"id": 6,
+				"name": "Jiro"
+			},
+			"content": "How are you today?"
+		}
+	]
+}

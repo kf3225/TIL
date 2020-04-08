@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS post CASCADE;
 CREATE TABLE IF NOT EXISTS post(
     id SERIAL PRIMARY KEY,
-    author_id INTEGER REFERENCES author(id),
+    author_id INTEGER REFERENCES author(id) NOT NULL,
     content TEXT NOT NULL,
     delete_flag CHAR(1) DEFAULT '0'
 );
@@ -16,8 +16,8 @@ CREATE TABLE IF NOT EXISTS author(
 DROP TABLE IF EXISTS comment CASCADE;
 CREATE TABLE IF NOT EXISTS comment(
     id SERIAL PRIMARY KEY,
-    post_id INTEGER REFERENCES post(id),
-    author_id INTEGER REFERENCES author(id),
+    post_id INTEGER REFERENCES post(id) NOT NULL,
+    author_id INTEGER REFERENCES author(id) NOT NULL,
     content TEXT NOT NULL,
     delete_flag CHAR(1) DEFAULT '0'
 );

@@ -27,7 +27,8 @@ func RetriveCommentByCommentId(commentId int) (post Post, err error) {
 	    pa.id,
 	    pa.name,
 	    c.c_id,
-	    c.c_content,
+		c.c_content,
+		c.post_id,
 	    c.c_author_id,
 	    c.c_author_name
 	FROM post as p
@@ -52,7 +53,7 @@ func RetriveCommentByCommentId(commentId int) (post Post, err error) {
 	`
 	var comment Comment
 	err = Db.QueryRow(sql, commentId).Scan(&post.ID, &post.Content, &post.Author.ID, &post.Author.Name,
-		&comment.ID, &comment.Content, &comment.Author.ID, &comment.Author.Name)
+		&comment.ID, &comment.Content, &comment.PostID, &comment.Author.ID, &comment.Author.Name)
 	if err != nil {
 		fmt.Print("Error scanning Query :", err)
 		return
@@ -70,7 +71,8 @@ func RetrivePostById(id int) (post Post, err error) {
 	    pa.id,
 	    pa.name,
 	    c.c_id,
-	    c.c_content,
+		c.c_content,
+		c.post_id,
 	    c.c_author_id,
 	    c.c_author_name
 	FROM post as p
@@ -103,7 +105,7 @@ func RetrivePostById(id int) (post Post, err error) {
 		comment := Comment{}
 
 		err = rows.Scan(&post.ID, &post.Content, &post.Author.ID, &post.Author.Name,
-			&comment.ID, &comment.Content, &comment.Author.ID, &comment.Author.Name)
+			&comment.ID, &comment.Content, &comment.PostID, &comment.Author.ID, &comment.Author.Name)
 		if err != nil {
 			println("Error scanning :", err)
 			return
@@ -114,30 +116,45 @@ func RetrivePostById(id int) (post Post, err error) {
 }
 
 func (p *Post) createPost() (err error) {
-	statement := "INSERT INTO post (id, content, author) VALUES ($1, $2, $3) RETURNING id"
+	statement := "INSERT INTO post ( content, author_id ) VALUES ($1, $2) RETURNING id"
 	stmt, err := Db.Prepare(statement)
 	if err != nil {
 		return
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRow(p.ID, p.Content, p.Author).Scan(&p.ID)
+	err = stmt.QueryRow(p.Content, p.Author.ID).Scan(&p.ID)
 	return
 }
 
-func (p *Comment) createComment() (err error) {
-	stmt := "INSERT INTO comment (content, author_id) VALUES ($1, $2)"
+func (c *Comment) createComment() (err error) {
+	stmt := "INSERT INTO comment (content, post_id, author_id) VALUES ($1, $2, $3) RETURNING id"
 	statement, err := Db.Prepare(stmt)
 	if err != nil {
 		fmt.Println("Error Prepare statement :", err)
 	}
 	defer statement.Close()
+
+	var i int
+	err = statement.QueryRow(c.Content, c.PostID, c.Author.ID).Scan(&i)
 	return
 }
 
-func (p *Post) update(err error) {
-	updatestr := "UPDATE post SET content = $2, author = $3 WHERE id = $1"
-	_, err = Db.Exec(updatestr, p.ID, p.Content, p.Author)
+func (p *Post) updatePost(id int) (err error) {
+	sql := "UPDATE post SET content = $2, author_id = $3 WHERE id = $1 RETURNING id"
+	_, err = Db.Exec(sql, id, p.Content, p.Author.ID)
+	return
+}
+
+func (c *Comment) updateComment(id int) (err error) {
+	sql := "UPDATE comment SET content = $2 WHERE id = $1 RETURNING id"
+	_, err = Db.Exec(sql, id, c.Content)
+	return
+}
+
+func (a *Author) updateAuthor(id int) (err error) {
+	sql := "UPDATE author SET name = $2 WHERE id = $1 RETURNING id"
+	_, err = Db.Exec(sql, id, a.Name)
 	return
 }
 

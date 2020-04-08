@@ -27,6 +27,7 @@ type Author struct {
 type Comment struct {
 	ID      int    `json:"id"`
 	Content string `json:"content"`
+	PostID  int    `json:"post_id"`
 	Author  Author `json:"author"`
 }
 
@@ -45,8 +46,8 @@ func handleRequest(w http.ResponseWriter, r *http.Request) {
 		err = handleGet(w, r)
 	case http.MethodPost:
 		err = handlePost(w, r)
-	// case http.MethodPut:
-	// 	err = handlePut(w, r)
+	case http.MethodPut:
+		err = handlePut(w, r)
 	case http.MethodDelete:
 		err = handleDelete(w, r)
 	}
@@ -96,33 +97,73 @@ func handleGet(w http.ResponseWriter, r *http.Request) (err error) {
 
 // // Handling http Post method
 func handlePost(w http.ResponseWriter, r *http.Request) (err error) {
-	var in interface{}
 
 	switch filepath.Base(r.URL.Path) {
-	case "post_id":
-		in, err = decodeJson(r)
-	case "comment_id":
-		in, err = decodeJson(r)
+	case "post":
+		var post Post
+		if post, err = decodePostJson(r); err != nil && err != io.EOF {
+			fmt.Println("Error decode Post json :", err)
+			return
+		}
+		err = (&post).createPost()
+	case "comment":
+		var comment Comment
+		if comment, err = decodeCommentJson(r); err != nil && err != io.EOF {
+			fmt.Println("Error decode Comment json :", err)
+			return
+		}
+		err = (&comment).createComment()
 	}
 
 	if err != nil {
-		fmt.Println("Error decode json :", err)
+		fmt.Println("Error create data :", err)
 		return
 	}
 
-	switch itf := in.(type) {
-	case Post:
-		err = (&itf).createPost()
-	case Comment:
-		err = (&itf).createComment()
-	}
 	return
 }
 
 // // Handling http Put method
-// func handlePut(w http.ResponseWriter, r *http.Request) (err error) {
+func handlePut(w http.ResponseWriter, r *http.Request) (err error) {
 
-// }
+	var id int
+	var post Post
+	var comment Comment
+	var author Author
+	for key, value := range r.URL.Query() {
+		for _, v := range value {
+			if id, err = strconv.Atoi(v); err != nil {
+				fmt.Println("Error cast string to int :", err)
+				return
+			}
+			switch key {
+			case "post":
+				if post, err = decodePostJson(r); err != nil && err != io.EOF {
+					fmt.Println("Error decode post Json :", err)
+					return
+				}
+				err = (&post).updatePost(id)
+			case "comment":
+				if comment, err = decodeCommentJson(r); err != nil && err != io.EOF {
+					fmt.Println("Error decode comment Json :", err)
+					return
+				}
+				err = (&comment).updateComment(id)
+			case "author":
+				if author, err = decodeAuthorJson(r); err != nil && err != io.EOF {
+					fmt.Println("Error decode author Json :", err)
+					return
+				}
+				err = (&author).updateAuthor(id)
+			}
+		}
+	}
+	if err != nil {
+		fmt.Println("Error update data :", err)
+		return
+	}
+	return
+}
 
 // Handling http Delete method
 func handleDelete(w http.ResponseWriter, r *http.Request) (err error) {
@@ -164,14 +205,49 @@ func handleDelete(w http.ResponseWriter, r *http.Request) (err error) {
 	return
 }
 
-func decodeJson(r *http.Request) (in interface{}, err error) {
+func decodeCommentJson(r *http.Request) (comment Comment, err error) {
 	decoder := json.NewDecoder(r.Body)
 
 	for {
-		err = decoder.Decode(&in)
+		err = decoder.Decode(&comment)
 		if err == io.EOF {
 			break
 		}
+
+		if err != nil {
+			fmt.Println("Error decode json :", err)
+			return
+		}
+	}
+	return
+}
+
+func decodePostJson(r *http.Request) (post Post, err error) {
+	decoder := json.NewDecoder(r.Body)
+
+	for {
+		err = decoder.Decode(&post)
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			fmt.Println("Error decode json :", err)
+			return
+		}
+	}
+	return
+}
+
+func decodeAuthorJson(r *http.Request) (author Author, err error) {
+	decoder := json.NewDecoder(r.Body)
+
+	for {
+		err = decoder.Decode(&author)
+		if err == io.EOF {
+			break
+		}
+
 		if err != nil {
 			fmt.Println("Error decode json :", err)
 			return

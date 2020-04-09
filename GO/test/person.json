@@ -1,0 +1,13 @@
+{
+	"id": 1,
+	"branch": {
+		"id": 1,
+		"branch": "officeA",
+		"prefecture": "Tokyo",
+		"address": "Shinjuku 1-2-3, Tokyo"
+	},
+	"firstName": "Keisuke",
+	"lastName": "AAA",
+	"age": 29,
+	"sex": 0
+}

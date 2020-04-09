@@ -61,7 +61,7 @@ func TestYyy(t *testing.T) {
 |---------|:------:|:--------:|:-----------|
 |  Fail   |  Error | Errorf | ⬅️停止しない   |
 | FailNow |  Fatal | Fatalf | ⬅️停止する     |
-|         |    ⬆️  |    ⬆︎   |              |
+|         |    ⬆️  |    ⬆️   |              |
 |         |  Print | Printf |              |
 
 <br>
@@ -125,7 +125,7 @@ func BenchmarkDecode(b *testing.B) {
 go test -v -short -bench .
 ```
 
-テスト対象のベンチマークを測る事ができる(すべてのベンチマークを実行するた-benchに.=ドットを渡す)
+テスト対象のベンチマークを測る事ができる(すべてのベンチマークを実行するため-benchに.=ドットを渡す)
 
 ```shell
 go test -v -test.count 5 -short -bench .

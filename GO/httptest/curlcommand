@@ -1,0 +1,16 @@
+curl -i -X POST -H "Content-Type: application/json" -d '{"id":0,"firstName":"Taro","lastName":"Yamada","age":20,"sex":0,"address":{"personId":0,"prefecture":"Tokyo","town":"Shinjuku","houseNumber":"AAA 1-2-3"}}' "http://127.0.0.1:8080/person/"
+curl -i -X POST -H "Content-Type: application/json" -d '{"id":0,"firstName":"Jiro","lastName":"Yamada","age":21,"sex":0,"address":{"personId":0,"prefecture":"Tokyo","town":"Shinjuku","houseNumber":"BBB 1-2-3"}}' "http://127.0.0.1:8080/person/"
+curl -i -X POST -H "Content-Type: application/json" -d '{"id":0,"firstName":"Hanako","lastName":"Yamada","age":20,"sex":1,"address":{"personId":0,"prefecture":"Tokyo","town":"Shinjuku","houseNumber":"CCC 1-2-3"}}' "http://127.0.0.1:8080/person/"
+
+curl -i -X GET "http://127.0.0.1:8080/person/1"
+curl -i -X GET "http://127.0.0.1:8080/person/2"
+curl -i -X GET "http://127.0.0.1:8080/person/3"
+curl -i -X GET "http://127.0.0.1:8080/person/4"
+
+curl -i -X PUT -H "Content-Type: application/json" -d '{"id":0,"firstName":"Hanako","lastName":"Suzuki","age":20,"sex":1,"address":{"personId":0,"prefecture":"Tokyo","town":"Shinjuku","houseNumber":"CCC 1-2-3"}}' "http://127.0.0.1:8080/person/2"
+curl -i -X GET "http://127.0.0.1:8080/person/2"
+
+curl -i -X DELETE "http://127.0.0.1:8080/person/1"
+curl -i -X DELETE "http://127.0.0.1:8080/person/2"
+curl -i -X DELETE "http://127.0.0.1:8080/person/3"
+curl -i -X DELETE "http://127.0.0.1:8080/person/4"

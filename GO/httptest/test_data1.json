@@ -1,0 +1,13 @@
+{
+  "id": 0,
+  "firstName": "AAAAA",
+  "lastName": "AAAAA",
+  "age": 20,
+  "sex": 0,
+  "address": {
+    "personId": 0,
+    "prefecture": "AAAAA",
+    "town": "AAAAA",
+    "houseNumber": "AAAAA 1-2-3"
+  }
+}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -42,22 +43,22 @@ func main() {
 		}
 	}
 
-	http.HandleFunc("/person/", handlePersonRequest)
+	http.HandleFunc("/person/", handleRequest)
 
 	server.ListenAndServe()
 }
 
-func handlePersonRequest(w http.ResponseWriter, r *http.Request) {
+func handleRequest(w http.ResponseWriter, r *http.Request) {
 	var err error
 	switch r.Method {
 	case http.MethodGet:
-		err = handlePersonGet(w, r)
+		err = handleGet(w, r)
 	case http.MethodPost:
-		err = handlePersonPost(w, r)
+		err = handlePost(w, r)
 	case http.MethodPut:
-		err = handlePersonPut(w, r)
+		err = handlePut(w, r)
 	case http.MethodDelete:
-		err = handlePersonDelete(w, r)
+		err = handleDelete(w, r)
 	}
 	if err != nil {
 		log.Println(err)
@@ -66,7 +67,7 @@ func handlePersonRequest(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func handlePersonGet(w http.ResponseWriter, r *http.Request) (err error) {
+func handleGet(w http.ResponseWriter, r *http.Request) (err error) {
 	id, err := strconv.Atoi(path.Base(r.URL.Path))
 	if err != nil {
 		log.Println(err)
@@ -100,7 +101,7 @@ func handlePersonGet(w http.ResponseWriter, r *http.Request) (err error) {
 	return
 }
 
-func handlePersonPost(w http.ResponseWriter, r *http.Request) (err error) {
+func handlePost(w http.ResponseWriter, r *http.Request) (err error) {
 	id, err := findLastNum()
 	if err != nil {
 		log.Println(err)
@@ -145,7 +146,7 @@ func handlePersonPost(w http.ResponseWriter, r *http.Request) (err error) {
 	return
 }
 
-func handlePersonPut(w http.ResponseWriter, r *http.Request) (err error) {
+func handlePut(w http.ResponseWriter, r *http.Request) (err error) {
 	id, err := strconv.Atoi(path.Base(r.URL.Path))
 	if err != nil {
 		log.Println(err)
@@ -167,15 +168,16 @@ func handlePersonPut(w http.ResponseWriter, r *http.Request) (err error) {
 	defer jsonFile.Close()
 
 	var person Person
-	b, err := ioutil.ReadAll(r.Body)
-	if err = json.Unmarshal(b, &person); err != nil {
+	buffer := new(bytes.Buffer)
+	buffer.ReadFrom(r.Body)
+	if err = json.Unmarshal(buffer.Bytes(), &person); err != nil {
 		log.Println(err)
 		return
 	}
 
 	person.ID = id
 	person.Address.PersonID = id
-	b, err = json.MarshalIndent(&person, "", "\t")
+	b, err := json.MarshalIndent(&person, "", "\t")
 	if err != nil {
 		log.Println(err)
 		return
@@ -190,7 +192,7 @@ func handlePersonPut(w http.ResponseWriter, r *http.Request) (err error) {
 
 }
 
-func handlePersonDelete(w http.ResponseWriter, r *http.Request) (err error) {
+func handleDelete(w http.ResponseWriter, r *http.Request) (err error) {
 	id, err := strconv.Atoi(path.Base(r.URL.Path))
 	if err != nil {
 		log.Println(err)

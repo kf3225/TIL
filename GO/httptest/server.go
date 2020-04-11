@@ -168,6 +168,7 @@ func handlePut(w http.ResponseWriter, r *http.Request) (err error) {
 	defer jsonFile.Close()
 
 	var person Person
+
 	buffer := new(bytes.Buffer)
 	buffer.ReadFrom(r.Body)
 	if err = json.Unmarshal(buffer.Bytes(), &person); err != nil {
@@ -177,6 +178,7 @@ func handlePut(w http.ResponseWriter, r *http.Request) (err error) {
 
 	person.ID = id
 	person.Address.PersonID = id
+
 	b, err := json.MarshalIndent(&person, "", "\t")
 	if err != nil {
 		log.Println(err)

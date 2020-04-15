@@ -123,3 +123,66 @@ caught << 4
 
 バッファ付チャネルは業務を処理するプロセスに制限がある時に便利<br>
 ➡️　プロセスに渡す要求の数を絞れる
+
+<br>
+
+select
+--
+
+selectはチャネル版switch文のようなもの<br>
+
+- Aケースのチャネルに値が入っていて、Bケースには入っていない : Aケースが選択
+- Bケースのチャネルに値が入っていて、Aケースには入っていない : Bケースが選択
+- どちらのケースにも値がある : Goのランタイムがどちらかをランダムに選択
+- どちらのケースにも値がない : defaultブロックに入る
+
+※defaultブロックがない場合デッドロックになる（ならないようにする方法もある＝close）<br>
+	➡️　A, B両方のゴルーチンから値を取り出され、両方のゴルーチンがスリープする為
+
+
+```go
+func callerA(c chan string) {
+	c <- "Hello World!"
+	// close関数で文字列受信後にチャネルを閉じた状態にする
+	close(c)
+}
+
+func callerB(c chan string) {
+	c <- "Hola Mundo!"
+	// close関数で文字列受信後にチャネルを閉じた状態にする
+	close(c)
+}
+
+func main() {
+	a, b := make(chan string), make(chan string)
+
+	go callerA(a)
+	go callerB(b)
+
+	var msg string
+	ok1, ok2 := true, true
+	for ok1 || ok2 {
+
+		select {
+		// msgに文字列を送信、ok1にチャネルがcloseされたかのbool値
+		// callerAでチャネルに文字列が送信されたあともチャネルがcloseされるまでtrue
+		case msg, ok1 = <-a:
+			if ok1 {
+				fmt.Printf("%s from A, ok1 is %v now\n", msg, ok1)
+			}
+			fmt.Println("ok1", ok1)
+		// msgに文字列を送信、ok1にチャネルがcloseされたかのbool値
+		// callerBでチャネルに文字列が送信されたあともチャネルがcloseされるまでtrue
+		case msg, ok2 = <-b:
+			if ok2 {
+				fmt.Printf("%s from B, ok2 is %v now\n", msg, ok2)
+			}
+			fmt.Println("ok2", ok2)
+
+		}
+	}
+}
+```
+
+- チャネルがcloseしてもそのチャネルが使えなくなるということではない
+- チャネルcloseはそのチャネルにもう何も値が送信されないことを受信側に示すだけ

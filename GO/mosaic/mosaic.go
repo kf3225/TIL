@@ -1,9 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"image/color"
+	"io/ioutil"
+	"math"
+	"os"
+	"path"
 )
+
+// TILESDB メモリ展開グローバル変数
+var TILESDB map[string][3]float64
 
 // 画像（区分けされたセクションを想定）の平均色を算出
 func averageColor(img image.Image) [3]float64 {
@@ -45,8 +53,75 @@ func resize(in image.Image, newWidth int) image.NRGBA {
 		for x, i := bounds.Min.X, bounds.Min.X; x < bounds.Max.X; x, i = x+ratio, i+1 {
 			r, g, b, a := in.At(x, y).RGBA()
 			out.SetNRGBA(
-				i, j, color.NRGBA{uint8(r >> 8), uint8(g >> 8), uint8(b >> b), uint8(a >> 8)})
+				i, j, color.NRGBA{uint8(r >> 8), uint8(g >> 8), uint8(b >> 8), uint8(a >> 8)})
 		}
 	}
 	return *out
+}
+
+// タイル画像データをメモリ展開
+func tileDB() map[string][3]float64 {
+	fmt.Println("start populating tiles db...")
+
+	db := make(map[string][3]float64)
+	readDir := "tiles"
+	files, _ := ioutil.ReadDir(readDir)
+	for _, f := range files {
+		name := path.Join(readDir, f.Name())
+		file, err := os.Open(name)
+
+		if err == nil {
+			img, _, err := image.Decode(file)
+
+			if err == nil {
+				db[name] = averageColor(img)
+			} else {
+				fmt.Println("error in populating TILE DB:", err, name)
+			}
+		} else {
+			fmt.Println("cannot open file:", err, name)
+		}
+		file.Close()
+	}
+	fmt.Println("finish populating tiles db")
+
+	return db
+}
+
+// メモリ展開したタイルデータをクローン
+func cloneTilesDB() map[string][3]float64 {
+	db := make(map[string][3]float64)
+	for k, v := range TILESDB {
+		db[k] = v
+	}
+	return db
+}
+
+// 色の近似値ファイルを探す
+func findNearest(target [3]float64, db *map[string][3]float64) string {
+	var fileName string
+
+	smallest := 1000000.0
+
+	for k, v := range *db {
+		dist := distance(target, v)
+		// 前の周の距離より短ければ距離とファイル名を保存
+		// 最終的に残った物が近似値ファイル
+		if dist < smallest {
+			fileName, smallest = k, dist
+		}
+	}
+	delete(*db, fileName)
+	return fileName
+}
+
+// 距離を算出
+// 2次元におけるユークリッド距離 : √(x1-y1)^2+(x2-y2)^2
+// n次元におけるユークリッド距離 : √(x1-y1)^2+(x2-y2)^2 ... (xn-yn)^2
+func distance(p1 [3]float64, p2 [3]float64) float64 {
+	return math.Sqrt(sq(p2[0]-p1[0]) + sq(p2[1]-p1[1]) + sq(p2[2]-p1[2]))
+}
+
+func sq(n float64) float64 {
+	return n * n
 }

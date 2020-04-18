@@ -111,7 +111,8 @@ func findNearest(target [3]float64, db *map[string][3]float64) string {
 			fileName, smallest = k, dist
 		}
 	}
-	delete(*db, fileName)
+	// 一度使ったタイルを使い回しOKならコメントアウト外す
+	//delete(*db, fileName)
 	return fileName
 }
 

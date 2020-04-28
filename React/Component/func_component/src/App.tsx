@@ -29,7 +29,7 @@ const App: FC<{}> = () => {
       <header>
         <h1>Characters</h1>
       </header>
-      <CharacterList school="ABC" characterList={characters} />
+      <CharacterList characterList={characters} />
     </div>
   );
 };

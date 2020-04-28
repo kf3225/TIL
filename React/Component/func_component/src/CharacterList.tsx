@@ -9,7 +9,7 @@ export interface Character {
 }
 
 interface CharacterListProps {
-  school: string;
+  school?: string;
   characterList: Character[];
 }
 
@@ -21,7 +21,7 @@ const CharacterList: FC<CharacterListProps> = ({
     <Header as="h2">{school}</Header>
     <Item.Group>
       {characterList.map((c) => (
-        <Item>
+        <Item key={c.id}>
           <Icon name="user circle" size="huge" />
           <Item.Content>
             <Item.Header>name : {c.name}</Item.Header>

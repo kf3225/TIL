@@ -41,10 +41,11 @@ const AppComponent: FC<AppProps> = ({ timeLeft, keep, reset, stopOrRestart }) =>
 
 ```typescript
 const useTimer = (
-  limitSec: number
+  limitSec: number,
+  remain: boolean
 ): [number, boolean, () => void, () => void] => {
   const [timeLeft, setTimeLeft] = useState(limitSec);
-  const [keep, setKeep] = useState(true);
+  const [keep, setKeep] = useState(remain);
 ```
 
 Local State に必要なカウントダウンの値とスタートストップ状態、reset 関数と stopOrRestart 関数を配列に設定した戻り値を返す

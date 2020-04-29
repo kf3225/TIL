@@ -1,44 +1,87 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Custom Hook
 
-## Available Scripts
+## コンポーネントを役割で二つに分割
 
-In the project directory, you can run:
+1. コンポーネント : Presentational Component -> 表示部分
+2. コンテナ : Container Component -> Local State を含む Props などの処理部分
 
-### `yarn start`
+|            | component                                      | container                                             |
+| ---------- | ---------------------------------------------- | ----------------------------------------------------- |
+| 関心       | どのように見えるか                             | どのように機能するか                                  |
+| 送受信     | データや振る舞いを Props として一方的に受信    | データや振る舞いを他のコンポーネントに送信する        |
+| Flux       | Flux の Store 等に依存しない                   | Flux の Action 実行や Flux の Store に依存            |
+| データ変更 | データ変更に介入しない                         | データ変更に介入し、任意の処理を行う                  |
+| 書き方     | 関数コンポーネントが多数                       | HOC や Render Props（オワコンらしい）や Hooks（熱い） |
+| Dir        | ./components/AAA.tsx<br />./components/BBB.tsx | ./containers/AAA.tsx<br />./containers/BBB.tsx        |
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+<br />
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+## 今回のケース
 
-### `yarn test`
+### component
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```typescript
+interface AppProps {
+  timeLeft: number;
+  keep: boolean;
+  reset: () => void;
+  stopOrRestart: () => void;
+}
 
-### `yarn build`
+const AppComponent: FC<AppProps> = ({ timeLeft, keep, reset, stopOrRestart }) => (
+```
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+ボタンクリック時の関数や Local State を外から注入する形で、それに合わせて interface を定義する
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+<br />
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### container
 
-### `yarn eject`
+**_useTimer 関数が今回の肝の Custom Hooks(関数名は useXxx とするのが慣習。しないと Eslint に怒られる)_**
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```typescript
+const useTimer = (
+  limitSec: number
+): [number, boolean, () => void, () => void] => {
+  const [timeLeft, setTimeLeft] = useState(limitSec);
+  const [keep, setKeep] = useState(true);
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Local State に必要なカウントダウンの値とスタートストップ状態、reset 関数と stopOrRestart 関数を配列に設定した戻り値を返す
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+引数から取得したカウントとスタートストップ状態の初期値で useState()から state と setter を取得する
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+初期値を引数から取得する形にしているので 1 分や 5 分などのカウントダウンタイマーとして対応可能
 
-## Learn More
+```typescript
+// ボタンクリック時のreset関数
+const reset = () => {
+  setTimeLeft(limitSec);
+};
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+// ボタンクリック時のstopOrRestart関数
+const stopOrRestart = () => {
+  setKeep(!keep);
+};
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+useEffect(() => {
+  const tick = () => {
+    setTimeLeft((prevTime) => (prevTime === 0 ? limitSec : prevTime - 1));
+  };
+  let timerId: NodeJS.Timer;
+  if (keep) {
+    timerId = setInterval(tick, 1000);
+  }
+  return () => clearInterval(timerId);
+}, [keep, limitSec]);
+
+return [timeLeft, keep, reset, stopOrRestart];
+};
+```
+
+useEffect()でマウント時や更新時の挙動やアンマウント時の挙動を規定している
+
+useEffect()の第二引数の値に変化がある場合、<br />
+例えばlimitSecが変わって1分から2分のカウントダウンタイマーへ変わると値の変化を察知して<br/>
+useEffect()が再実行され、tick()の挙動が再定義されることによってカウントが0まで進んだ後の<br />
+リセット後の値が1分から2分へと変更される

@@ -19,7 +19,7 @@ export interface Character {
 }
 
 interface CharacterListProps {
-  school: string;
+  school?: string;
   characters: Character[];
 }
 

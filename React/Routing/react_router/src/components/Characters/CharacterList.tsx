@@ -73,6 +73,7 @@ const CharacterList: React.SFC<CharacterListProps> = ({
             <IconButton
               aria-label="add to favorites"
               onClick={isPressFavoriteButton}
+              key={c.id}
             >
               <Favorite color={fav ? "secondary" : "action"} />
             </IconButton>

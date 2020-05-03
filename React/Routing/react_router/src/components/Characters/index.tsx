@@ -11,9 +11,9 @@ import { Helmet } from "react-helmet";
 import CharacterList from "./CharacterList";
 import "./index.css";
 
-type CharacterListProps =　{} & RouteComponentProps<{ code: string }>;
+type CharacterListProps = {} & RouteComponentProps<{ code: string }>;
 
-const Characters: React.SFC<CharacterListProps> = ({
+const Characters: React.FC<CharacterListProps> = ({
   history,
   location,
   match,
@@ -33,7 +33,8 @@ const Characters: React.SFC<CharacterListProps> = ({
       {isLoading ? (
         <Spinner />
       ) : (
-        <CharacterList key={characterData[targetCode].school}
+        <CharacterList
+          key={characterData[targetCode].school}
           school={characterData[targetCode].school}
           characters={characterData[targetCode].players}
         />

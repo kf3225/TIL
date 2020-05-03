@@ -8,25 +8,25 @@ import {
   ListItemText,
   Typography,
   ListItemIcon,
+  makeStyles,
 } from "@material-ui/core";
-import { Folder, ExpandLess, ExpandMore, StarBorder } from "@material-ui/icons";
+import { Folder } from "@material-ui/icons";
 
 import { characterData } from "../../characterData";
 
+const useStyles = makeStyles({
+  list: {
+    minWidth: 275,
+    maxWidth: 275,
+    margin: "0 2px",
+    paddingLeft: "5%",
+  }
+})
+
 const codes = Object.keys(characterData);
 
-const Home: React.SFC<{}> = () => {
-  const [dense, setDense] = React.useState(false);
-  const [secondary, setSecondary] = React.useState(false);
-
-  const generate = (element: React.ReactElement) => {
-    return codes.map((code) =>
-      React.cloneElement(element, {
-        key: characterData[code].school,
-      })
-    );
-  };
-
+const Home: React.FC<{}> = () => {
+  const classes = useStyles()
   return (
     <>
       <Helmet>
@@ -40,18 +40,20 @@ const Home: React.SFC<{}> = () => {
       </Container>
       <Typography variant="h6">Schools</Typography>
       <div>
-        <List dense={dense}>
+        <List className={classes.list}>
           {codes.map((code) =>
             React.cloneElement(
-              <ListItem button component={Link} to={`characters/${characterData[code].school}`}>
+              <ListItem
+                button
+                component={Link}
+                to={`characters/${characterData[code].school}`}
+              >
                 <ListItemIcon>
                   <Folder />
                 </ListItemIcon>
                 <ListItemText primary={code} />
               </ListItem>,
-              {
-                key: code,
-              }
+              characterData[code]
             )
           )}
         </List>

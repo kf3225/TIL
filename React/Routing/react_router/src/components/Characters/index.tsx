@@ -11,7 +11,7 @@ import { Helmet } from "react-helmet";
 import CharacterList from "./CharacterList";
 import "./index.css";
 
-type CharacterListProps = RouteComponentProps<{ code: string }>;
+type CharacterListProps =　{} & RouteComponentProps<{ code: string }>;
 
 const Characters: React.SFC<CharacterListProps> = ({
   history,
@@ -28,12 +28,12 @@ const Characters: React.SFC<CharacterListProps> = ({
         <title>Characters</title>
       </Helmet>
       <header>
-        <h1>CharacterList</h1>
+        <h1>CharacterList / {characterData[targetCode].school}</h1>
       </header>
       {isLoading ? (
         <Spinner />
       ) : (
-        <CharacterList
+        <CharacterList key={characterData[targetCode].school}
           school={characterData[targetCode].school}
           characters={characterData[targetCode].players}
         />

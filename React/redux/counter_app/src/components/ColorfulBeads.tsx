@@ -14,7 +14,6 @@ import {
 import { Container, makeStyles } from "@material-ui/core";
 import { Brightness1 } from "@material-ui/icons";
 
-
 const useStyles = makeStyles({
   beadsbox: {
     marginTop: "40px",

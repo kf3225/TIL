@@ -13,14 +13,16 @@ const counterReducer: Reducer<CounterState, CounterAction> = (
 ): CounterState => {
   switch (action.type) {
     case CounterActionType.ADD:
+      const addAns = state.count + (action.amount || 0);
       return {
         ...state,
-        count: state.count + (action.amount || 0),
+        count: addAns >= 0 ? addAns : 0,
       };
     case CounterActionType.DECREMENT:
+      const decrementAns = state.count - 1
       return {
         ...state,
-        count: state.count - 1,
+        count: decrementAns >= 0 ? decrementAns : 0,
       };
     case CounterActionType.INCREMENT:
       return {
@@ -28,6 +30,7 @@ const counterReducer: Reducer<CounterState, CounterAction> = (
         count: state.count + 1,
       };
     default: {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const _: never = action.type;
 
       return state;

@@ -1,0 +1,3 @@
+export const GET_MEMBERS_START = "GITHUB_GET_MEMBERS_START" as const;
+export const GET_MEMBERS_SUCCEED = "GITHUB/GET_MEMBERS_SUCCEED" as const;
+export const GET_MEMBERS_FAIL = "GITHUB/GET_MEMBERS_FAIL" as const;

@@ -52,3 +52,25 @@ const hoge = <T, U, P extends foo>(arg1: T, arg2: U, arg3: P) => ({
   c: arg3, // args3はinterface fooの要素を満たしていなければコンパイルエラー
 });
 ```
+
+<br />
+
+## axiosメモ
+
+>Promise based HTTP client for the browser and node.js
+
+https://github.com/axios/axios
+
+<br />
+
+**1. create()**
+
+```typescript
+// AxiosRequestConfigを生成
+const instance = axios.create({ 
+  baseURL: `https://some-domain.com/api/`,
+  timeout: 7000,
+  headers: { "Content-Type": "application/json" },
+  responseType: 'json',
+});
+```

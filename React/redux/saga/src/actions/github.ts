@@ -12,21 +12,24 @@ interface GetMembersResult {
 }
 
 export const getMembers = {
-  start: (params: GetMembersParams) => ({
-    type: ActionType.GET_MEMBERS_START,
-    payload: params,
-  }),
+  start: (params: GetMembersParams) =>
+    ({
+      type: ActionType.GET_MEMBERS_START,
+      payload: params,
+    } as const),
 
-  succeed: (params: GetMembersParams, result: GetMembersResult) => ({
-    type: ActionType.GET_MEMBERS_SUCCEED,
-    payload: { params, result },
-  }),
+  succeed: (params: GetMembersParams, result: GetMembersResult) =>
+    ({
+      type: ActionType.GET_MEMBERS_SUCCEED,
+      payload: { params, result },
+    } as const),
 
-  fail: (params: GetMembersParams, error: AxiosError) => ({
-    type: ActionType.GET_MEMBERS_FAIL,
-    payload: { params, error },
-    error: true,
-  }),
+  fail: (params: GetMembersParams, error: AxiosError) =>
+    ({
+      type: ActionType.GET_MEMBERS_FAIL,
+      payload: { params, error },
+      error: true,
+    } as const),
 };
 
 export type GithubAction =
